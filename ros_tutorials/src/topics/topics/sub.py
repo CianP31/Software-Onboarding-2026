@@ -43,6 +43,7 @@ class Sub(Node):
         # create_subscription:
         #   Creates a subscriber that listens on a topic and calls a callback when
         #   a message is received.
+        self.create_subscription(String, 'topic', self.listener_callback, 10)
         #   Usage: self.create_subscription(MessageType, 'topic_name', callback, qos)
         #   - MessageType: the ROS message class, e.g. String
         #   - 'topic_name': name of the ROS topic to subscribe to
@@ -54,6 +55,7 @@ class Sub(Node):
     # The callback should accept a String message and log the data.
     def listener_callback(self, msg):
         # TODO: Log the incoming message data
+        self.get_logger().info(msg.data)
 
         # self.get_logger():
         #   Returns the node's ROS logger, which is used for logging messages to
@@ -67,10 +69,12 @@ class Sub(Node):
         
         pass
 
-
-if __name__ == '__main__':
+def main(args=None):
     rclpy.init()
     node = Sub()
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()

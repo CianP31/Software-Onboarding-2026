@@ -35,8 +35,11 @@ class Pub(Node):
     def __init__(self):
         super().__init__('pub')
 
+        self.i = 0  # Initialize a counter for the message number
         # TODO: Create a publisher for String messages on the "topic" topic with a queue size of 10
         # TODO: Create a timer that calls self.timer_callback every 1 second (1.0)
+        self.publisher_ = self.create_publisher(String, 'topic', 10)
+        self.timer_ = self.create_timer(1.0, self.timer_callback)
 
         # create_timer:
         #   Creates a repeating callback based on a time interval.
@@ -50,7 +53,7 @@ class Pub(Node):
         #   Usage: self.create_publisher(MessageType, 'topic_name', queue_size)
         #   - MessageType: the ROS message class, e.g. String
         #   - 'topic_name': name of the ROS topic to publish to
-        #   - queue_size: outgoing message queue size
+       #   - queue_size: outgoing message queue size
         #   Typical use: send data to subscribers on the topic.
 
     # Create a timer callback that publishes a message every second.
@@ -58,14 +61,19 @@ class Pub(Node):
     # where i is an incremented intenger, and publish it to the topic.
     def timer_callback(self):
         # TODO: Create message object of type String
+        msg = String()
         # TODO: Set its data attribute to "Message {i}!" where i is an incremented integer
+        msg.data = f"Message {self.i}!"
         # TODO: Publish the message using the publisher created in __init__
-        pass
+        self.publisher_.publish(msg)
+        self.i += 1
 
-
-if __name__ == '__main__':
+def main(args=None):
     rclpy.init()
     node = Pub()
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
