@@ -23,6 +23,7 @@
 import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionServer
+from interfaces.action import SleepFor
 
 # Action design:
 #   Goal: seconds (float64)
@@ -48,9 +49,14 @@ class Server(Node):
         super().__init__('action_server')
 
         # TODO: Create an action server for the SleepFor action type.
+        self._action_server = ActionServer(
+            self,
+            SleepFor,
+            'sleep_for',
+            self.execute_callback
+        )
         # TODO: Use an execute_callback that handles the goal.
         # TODO: Publish feedback while sleeping.
-
         # ActionServer():
         #   Creates an action server that receives goals and manages execution.
         #   Usage: ActionServer(Node, ActionType, 'action_name', execute_callback)
@@ -61,6 +67,7 @@ class Server(Node):
         #   Typical use: long-running tasks such as moving a robot, waiting, or processing work.
         #
         # self.get_logger():
+        self.get_logger().info('Action server is ready to receive sleep goals.')
         #   Returns the node's ROS logger, used for logging status updates.
         #   Usage: self.get_logger().info('message')
 
@@ -68,10 +75,22 @@ class Server(Node):
     # The callback should read the goal, send feedback periodically, and return a result.
     def execute_callback(self, goal_handle):
         # TODO: Read goal_handle.request.seconds
+        seconds = goal_handle.request.seconds
         # TODO: Sleep for the requested duration
+        sleep_time = 0.0
+        while sleep_time < seconds:
+            rclpy.spin_once(self, timeout_sec=0.1)
+            sleep_time += 0.1
         # TODO: Construct SleepFor.Feedback object and periodically publish remaining time
+        feedback_msg = SleepFor.Feedback()
+        feedback_msg.remaining = seconds - sleep_time
+        goal_handle.publish_feedback(feedback_msg)
         # TODO: Call goal_handle.succeed() when done
+        goal_handle.succeed()
         # TODO: Set the result as successful and return it
+        result = SleepFor.Result()
+        result.success = True
+        return result
         # NOTE: There are several ways to handle the feedback mechanism here, but the most intuitive 
         #       is probably to use a loop that sleeps for a short interval (e.g., 0.1 seconds) and 
         #       updates the remaining time in feedback.

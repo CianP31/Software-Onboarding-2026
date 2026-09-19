@@ -21,6 +21,7 @@
 
 import rclpy
 from rclpy.node import Node
+from interfaces.srv import RandomNumber
 
 # Service design:
 #   Request: min_value, max_value (int64)
@@ -45,6 +46,7 @@ class ServiceServer(Node):
         super().__init__('service_server')
 
         # TODO: Create a service for the random-number request/response type.
+        self.create_service(RandomNumber, 'generate_random_number', self.generate_random_number)
         # TODO: Use a callback method such as self.generate_random_number
         # TODO: Register the service under a topic name like 'generate_random_number'
 
@@ -58,6 +60,7 @@ class ServiceServer(Node):
         #   device control requests, or configurations.
         #
         # self.get_logger():
+        self.get_logger().info('Service server is ready to generate random numbers.')
         #   Returns the node's ROS logger, used for printing status and debug output.
         #   Usage: self.get_logger().info('message')
         #   - info(): log informational messages
@@ -69,6 +72,10 @@ class ServiceServer(Node):
     # and return a response containing the generated number.
     def generate_random_number(self, request, response):
         # TODO: Read request.min_value and request.max_value
+        min_value = request.min_value
+        max_value = request.max_value
+        random_number = random.randint(min_value, max_value)
+        response.random_number = random_number
         # TODO: Generate a random integer in the requested range
         # TODO: Set response.random_number to the generated value
         # TODO: Return response

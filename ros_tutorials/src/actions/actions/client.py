@@ -18,6 +18,7 @@
 import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionClient
+from interfaces.action import SleepFor
 
 # Action design:
 #   Goal: seconds (float64)
@@ -43,8 +44,13 @@ class Client(Node):
         super().__init__('action_client')
 
         # TODO: Create an action client for the SleepFor action type.
+        self._action_client = ActionClient(self, SleepFor, 'sleep_for')
         # TODO: Wait until the action server is available.
+        self._action_client.wait_for_server()
         # TODO: Construct a goal with a duration value.
+        goal_msg = SleepFor.Goal()
+        goal_msg.seconds = 5.0  # Example duration
+        self.get_logger().info(f'Sending goal to sleep for {goal_msg.seconds} seconds.')
 
         # ActionClient():
         #   Creates an action client used to send goals to a ROS action server.
@@ -69,9 +75,14 @@ class Client(Node):
         #   The callback receives feedback updates while the goal is running.
         #
         # TODO: Build a SleepFor.Goal request with a sleep duration.
+        goal_msg = SleepFor.Goal()
+        goal_msg.seconds = seconds
         # TODO: Wait for the action server to accept the goal.
+        self._action_client.wait_for_server()
         # TODO: Send the goal to the action server to be completed asynchronously.
+        return self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
         # TODO: Use a feedback callback that logs feedback from the server.
+        # self.get_logger().info(f'Goal sent to sleep for {seconds} seconds.')
         # NOTE: The feedback callback can be attached when you call the server's 
         #       send_goal_async() method.
         pass
@@ -81,9 +92,14 @@ class Client(Node):
         #   The data returned by the action server while the task is in progress.
         #   Usage: feedback_msg.feedback.remaining
         # TODO: Read and log feedback_msg.feedback.
+        remaining_time = feedback_msg.feedback.remaining
+        self.get_logger().info(f'Remaining time: {remaining_time:.2f} seconds')
+        # NOTE: The feedback callback is called periodically by the action server
+        #       while the goal is being processed. It provides updates on the task's progress.
         pass
 
 def main():
+    rclpy.init()
     node = Client()
     future = node.send_goal(10.0) # 10 seconds sleep duration
     rclpy.spin_until_future_complete(node, future)
