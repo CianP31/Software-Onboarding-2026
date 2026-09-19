@@ -69,12 +69,13 @@ class Sub(Node):
         
         pass
 
-def main(args=None):
+def main():
     rclpy.init()
     node = Sub()
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
 
+    
 if __name__ == '__main__':
     main()
